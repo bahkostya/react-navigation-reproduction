@@ -21,6 +21,8 @@ import {
   Themed,
   createAppContainer,
   SafeAreaView,
+  NavigationState,
+  NavigationRoute,
 } from 'react-navigation';
 import { createStackNavigator } from 'react-navigation-stack';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -407,12 +409,30 @@ const Navigation = createAppContainer(
   )
 );
 
+function findPageNames(routes: NavigationRoute[]): string[] {
+  const pageNames = [];
+
+  // breaks here
+  for (const route of routes) {
+    pageNames.push(...findPageNames(route.routes));
+  }
+
+  return pageNames;
+}
+
+async function persistNavigationState(navState: NavigationState) {
+  findPageNames(navState.routes);
+}
+
 export default function App() {
   let [theme, setTheme] = React.useState<SupportedThemes>('light');
 
   return (
     <View style={{ flex: 1 }}>
-      <Navigation theme={theme} />
+      <Navigation
+        theme={theme}
+        persistNavigationState={persistNavigationState}
+      />
       <View style={{ position: 'absolute', bottom: 60, right: 20 }}>
         <TouchableOpacity
           onPress={() => {
